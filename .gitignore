@@ -1,0 +1,18 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Flask instance data
+instance/
+
+# Environment variables
+.env
+
+# IDE files
+.vscode/
+
+# Pytest cache
+.pytest_cache/
