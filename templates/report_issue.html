@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Report Issue - CitizenFix</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🏙️ CitizenFix
+        </div>
+
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+    </nav>
+
+    <section class="dashboard-container">
+
+        <h1>Report a Civic Issue</h1>
+
+        <p>
+            Tell us about the problem you found in your community.
+        </p>
+
+        <div class="dashboard-card">
+
+            <form method="POST">
+
+                <label for="title">
+                    Issue Title
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="Example: Large pothole on main road"
+                    required
+                >
+
+
+                <label for="description">
+                    Description
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="5"
+                    placeholder="Describe the issue clearly..."
+                    required
+                ></textarea>
+
+
+                <label for="category">
+                    Category
+                </label>
+
+                <select id="category" name="category" required>
+
+                    <option value="">
+                        Select a category
+                    </option>
+
+                    <option value="Roads">
+                        Roads
+                    </option>
+
+                    <option value="Garbage">
+                        Garbage
+                    </option>
+
+                    <option value="Streetlights">
+                        Streetlights
+                    </option>
+
+                    <option value="Water">
+                        Water
+                    </option>
+
+                    <option value="Drainage">
+                        Drainage
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+
+                <label for="location">
+                    Location
+                </label>
+
+                <input
+                    type="text"
+                    id="location"
+                    name="location"
+                    placeholder="Enter the issue location"
+                    required
+                >
+
+
+                <button type="submit" class="btn btn-primary">
+                    Submit Issue
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</body>
+
+</html>

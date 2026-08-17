@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard - CitizenFix</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🏙️ CitizenFix Admin
+        </div>
+
+        <div class="nav-links">
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+    </nav>
+
+
+    <section class="dashboard-container">
+
+        <h1>Admin Dashboard</h1>
+
+        <p>
+            Manage and track civic issues reported by citizens.
+        </p>
+
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+
+                {% for message in messages %}
+
+                    <p class="message">
+                        {{ message }}
+                    </p>
+
+                {% endfor %}
+
+            {% endif %}
+        {% endwith %}
+
+
+        <div class="dashboard-card">
+
+            <h2>All Reported Issues</h2>
+
+            {% if issues %}
+
+                {% for issue in issues %}
+
+                    <div class="issue-card">
+
+                        <h3>
+                            🛠️ {{ issue.title }}
+                        </h3>
+
+                        <p>
+                            <strong>Description:</strong>
+                            {{ issue.description }}
+                        </p>
+
+                        <p>
+                            <strong>Category:</strong>
+                            {{ issue.category }}
+                        </p>
+
+                        <p>
+                            <strong>Location:</strong>
+                            {{ issue.location }}
+                        </p>
+
+
+                        <form method="POST"
+                              action="{{ url_for('update_issue_status', issue_id=issue.id) }}">
+
+                            <label for="status-{{ issue.id }}">
+                                <strong>Status:</strong>
+                            </label>
+
+                            <select id="status-{{ issue.id }}"
+                                    name="status">
+
+                                <option value="Pending"
+                                    {% if issue.status == "Pending" %}selected{% endif %}>
+                                    Pending
+                                </option>
+
+                                <option value="In Progress"
+                                    {% if issue.status == "In Progress" %}selected{% endif %}>
+                                    In Progress
+                                </option>
+
+                                <option value="Resolved"
+                                    {% if issue.status == "Resolved" %}selected{% endif %}>
+                                    Resolved
+                                </option>
+
+                            </select>
+
+                            <button type="submit" class="btn btn-primary">
+                                Update Status
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>
+                    No civic issues have been reported yet.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</body>
+
+</html>
