@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard - CitizenFix</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🏙️ CitizenFix
+        </div>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/logout">Logout</a>
+        </div>
+
+    </nav>
+
+    <section class="dashboard-container">
+
+        <h1>Welcome to CitizenFix!</h1>
+
+        <p>You are successfully logged in.</p>
+
+        <div class="dashboard-card">
+
+            <h2>Your Dashboard</h2>
+
+            <p>
+                From here, you will be able to report civic issues
+                and track their resolution.
+            </p>
+
+            <a href="/" class="btn btn-primary">
+                Back to Home
+            </a>
+
+        </div>
+
+    </section>
+
+</body>
+
+</html>
