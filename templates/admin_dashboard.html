@@ -36,6 +36,7 @@
 
 
         {% with messages = get_flashed_messages() %}
+
             {% if messages %}
 
                 {% for message in messages %}
@@ -47,6 +48,7 @@
                 {% endfor %}
 
             {% endif %}
+
         {% endwith %}
 
 
@@ -79,12 +81,27 @@
                             {{ issue.location }}
                         </p>
 
+                        <p>
+                            <strong>Reported On:</strong>
+                            {{ issue.created_at | india_time }}
+                        </p>
+
+                        <p>
+                            <strong>Status:</strong>
+                            {{ issue.status }}
+                        </p>
+
+                        <p>
+                            <strong>Last Updated:</strong>
+                            {{ issue.updated_at | india_time }}
+                        </p>
+
 
                         <form method="POST"
                               action="{{ url_for('update_issue_status', issue_id=issue.id) }}">
 
                             <label for="status-{{ issue.id }}">
-                                <strong>Status:</strong>
+                                <strong>Change Status:</strong>
                             </label>
 
                             <select id="status-{{ issue.id }}"
@@ -107,7 +124,8 @@
 
                             </select>
 
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit"
+                                    class="btn btn-primary">
                                 Update Status
                             </button>
 

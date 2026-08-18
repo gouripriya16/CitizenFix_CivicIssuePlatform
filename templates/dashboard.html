@@ -83,8 +83,18 @@
                         </p>
 
                         <p>
+                            <strong>Reported On:</strong>
+                            {{ issue.created_at | india_time }}
+                        </p>
+
+                        <p>
                             <strong>Status:</strong>
                             {{ issue.status }}
+                        </p>
+
+                        <p>
+                            <strong>Last Updated:</strong>
+                            {{ issue.updated_at | india_time }}
                         </p>
 
                     </div>

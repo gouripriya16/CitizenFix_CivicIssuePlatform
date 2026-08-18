@@ -1,16 +1,30 @@
+from datetime import datetime, timezone
+
 from flask import render_template
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import (
+    login_user,
+    logout_user,
+    login_required,
+    current_user
+)
 from flask import request, redirect, url_for, flash
 
 from app import create_app, db
 from app.models import User, Issue
+from app.time_utils import format_india_time
 
 
 app = create_app()
 
 
+@app.template_filter("india_time")
+def india_time_filter(value):
+    return format_india_time(value)
+
+
 @app.route("/")
 def home():
+
     return render_template("index.html")
 
 
@@ -19,15 +33,21 @@ def register():
 
     if request.method == "POST":
 
-        name = request.form["name"]
+        name = request.form["name"].strip()
         email = request.form["email"].strip().lower()
         password = request.form["password"]
 
-        existing_user = User.query.filter_by(email=email).first()
+        existing_user = User.query.filter_by(
+            email=email
+        ).first()
 
         if existing_user:
+
             flash("Email already registered.")
-            return redirect(url_for("register"))
+
+            return redirect(
+                url_for("register")
+            )
 
         user = User(
             name=name,
@@ -40,9 +60,13 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        flash("Registration successful. Please login.")
+        flash(
+            "Registration successful. Please login."
+        )
 
-        return redirect(url_for("login"))
+        return redirect(
+            url_for("login")
+        )
 
     return render_template("register.html")
 
@@ -55,25 +79,23 @@ def login():
         email = request.form["email"].strip().lower()
         password = request.form["password"]
 
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(
+            email=email
+        ).first()
 
         if user and user.check_password(password):
 
             login_user(user)
 
-            # Temporary debug information
-            print(
-                "LOGIN:",
-                user.name,
-                user.email,
-                user.role,
-                user.id
-            )
-
             if user.role == "admin":
-                return redirect(url_for("admin_dashboard"))
 
-            return redirect(url_for("dashboard"))
+                return redirect(
+                    url_for("admin_dashboard")
+                )
+
+            return redirect(
+                url_for("dashboard")
+            )
 
         flash("Invalid email or password.")
 
@@ -86,6 +108,8 @@ def dashboard():
 
     issues = Issue.query.filter_by(
         user_id=current_user.id
+    ).order_by(
+        Issue.created_at.desc()
     ).all()
 
     return render_template(
@@ -118,9 +142,13 @@ def report_issue():
 
         flash("Issue reported successfully.")
 
-        return redirect(url_for("dashboard"))
+        return redirect(
+            url_for("dashboard")
+        )
 
-    return render_template("report_issue.html")
+    return render_template(
+        "report_issue.html"
+    )
 
 
 @app.route("/admin/dashboard")
@@ -128,10 +156,16 @@ def report_issue():
 def admin_dashboard():
 
     if current_user.role != "admin":
-        flash("Access denied.")
-        return redirect(url_for("dashboard"))
 
-    issues = Issue.query.all()
+        flash("Access denied.")
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+    issues = Issue.query.order_by(
+        Issue.created_at.desc()
+    ).all()
 
     return render_template(
         "admin_dashboard.html",
@@ -139,25 +173,42 @@ def admin_dashboard():
     )
 
 
-@app.route("/admin/update-issue/<int:issue_id>", methods=["POST"])
+@app.route(
+    "/admin/update-issue/<int:issue_id>",
+    methods=["POST"]
+)
 @login_required
 def update_issue_status(issue_id):
 
     if current_user.role != "admin":
-        flash("Access denied.")
-        return redirect(url_for("dashboard"))
 
-    issue = Issue.query.get_or_404(issue_id)
+        flash("Access denied.")
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+    issue = Issue.query.get_or_404(
+        issue_id
+    )
 
     new_status = request.form["status"]
 
     issue.status = new_status
 
+    issue.updated_at = datetime.now(
+        timezone.utc
+    ).replace(tzinfo=None)
+
     db.session.commit()
 
-    flash("Issue status updated successfully.")
+    flash(
+        "Issue status updated successfully."
+    )
 
-    return redirect(url_for("admin_dashboard"))
+    return redirect(
+        url_for("admin_dashboard")
+    )
 
 
 @app.route("/logout")
@@ -166,7 +217,9 @@ def logout():
 
     logout_user()
 
-    return redirect(url_for("home"))
+    return redirect(
+        url_for("home")
+    )
 
 
 if __name__ == "__main__":
