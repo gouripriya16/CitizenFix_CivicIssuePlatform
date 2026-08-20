@@ -163,13 +163,32 @@ def admin_dashboard():
             url_for("dashboard")
         )
 
-    issues = Issue.query.order_by(
-        Issue.created_at.desc()
-    ).all()
+
+    selected_status = request.args.get(
+        "status",
+        "All"
+    )
+
+
+    if selected_status == "All":
+
+        issues = Issue.query.order_by(
+            Issue.created_at.desc()
+        ).all()
+
+    else:
+
+        issues = Issue.query.filter_by(
+            status=selected_status
+        ).order_by(
+            Issue.created_at.desc()
+        ).all()
+
 
     return render_template(
         "admin_dashboard.html",
-        issues=issues
+        issues=issues,
+        selected_status=selected_status
     )
 
 
@@ -188,9 +207,11 @@ def update_issue_status(issue_id):
             url_for("dashboard")
         )
 
+
     issue = Issue.query.get_or_404(
         issue_id
     )
+
 
     new_status = request.form["status"]
 
@@ -202,12 +223,20 @@ def update_issue_status(issue_id):
 
     db.session.commit()
 
+
     flash(
         "Issue status updated successfully."
     )
 
+
     return redirect(
-        url_for("admin_dashboard")
+        url_for(
+            "admin_dashboard",
+            status=request.form.get(
+                "current_filter",
+                "All"
+            )
+        )
     )
 
 
