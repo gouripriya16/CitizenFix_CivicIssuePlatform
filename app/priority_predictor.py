@@ -1,10 +1,9 @@
 import os
-
 import joblib
 
 
 # --------------------------------------------------
-# Find the trained ML model
+# Find the project root
 # --------------------------------------------------
 
 BASE_DIR = os.path.dirname(
@@ -13,47 +12,46 @@ BASE_DIR = os.path.dirname(
     )
 )
 
+
+# --------------------------------------------------
+# Version 11 ML model
+# --------------------------------------------------
+
 MODEL_FILE = os.path.join(
     BASE_DIR,
     "models",
-    "priority_model.pkl"
+    "priority_model_v11.pkl"
 )
 
 
 # --------------------------------------------------
-# Load the model once when Flask starts
+# Check that model exists
 # --------------------------------------------------
 
 if not os.path.exists(MODEL_FILE):
-
     raise FileNotFoundError(
         f"Priority model not found: {MODEL_FILE}"
     )
 
 
-model = joblib.load(
-    MODEL_FILE
-)
+# --------------------------------------------------
+# Load the trained ML model
+# --------------------------------------------------
+
+model = joblib.load(MODEL_FILE)
 
 
 # --------------------------------------------------
 # Predict issue priority
 # --------------------------------------------------
 
-def predict_priority(
-    title,
-    description,
-    category
-):
+def predict_priority(title, description, category):
 
     title = str(title).strip()
-
     description = str(description).strip()
-
     category = str(category).strip()
 
-
-    # Combine all issue information
+    # Combine issue information
     issue_text = (
         title
         + " "
@@ -62,11 +60,7 @@ def predict_priority(
         + category
     )
 
-
-    # Ask the trained ML model
-    prediction = model.predict(
-        [issue_text]
-    )
-
+    # Predict using Version 11 ML model
+    prediction = model.predict([issue_text])
 
     return prediction[0]
