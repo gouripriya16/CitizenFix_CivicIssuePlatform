@@ -19,6 +19,7 @@ app = create_app()
 
 @app.template_filter("india_time")
 def india_time_filter(value):
+
     return format_india_time(value)
 
 
@@ -68,7 +69,9 @@ def register():
             url_for("login")
         )
 
-    return render_template("register.html")
+    return render_template(
+        "register.html"
+    )
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -97,9 +100,13 @@ def login():
                 url_for("dashboard")
             )
 
-        flash("Invalid email or password.")
+        flash(
+            "Invalid email or password."
+        )
 
-    return render_template("login.html")
+    return render_template(
+        "login.html"
+    )
 
 
 @app.route("/dashboard")
@@ -118,33 +125,63 @@ def dashboard():
     )
 
 
-@app.route("/report-issue", methods=["GET", "POST"])
+@app.route(
+    "/report-issue",
+    methods=["GET", "POST"]
+)
 @login_required
 def report_issue():
 
     if request.method == "POST":
 
         title = request.form["title"].strip()
-        description = request.form["description"].strip()
-        category = request.form["category"]
-        location = request.form["location"].strip()
+
+        description = request.form[
+            "description"
+        ].strip()
+
+        category = request.form[
+            "category"
+        ]
+
+        location = request.form[
+            "location"
+        ].strip()
+
 
         issue = Issue(
+
             title=title,
+
             description=description,
+
             category=category,
+
             location=location,
+
+            priority="Medium",
+
+            status="Pending",
+
             user_id=current_user.id
+
         )
 
+
         db.session.add(issue)
+
         db.session.commit()
 
-        flash("Issue reported successfully.")
+
+        flash(
+            "Issue reported successfully."
+        )
+
 
         return redirect(
             url_for("dashboard")
         )
+
 
     return render_template(
         "report_issue.html"
@@ -157,7 +194,9 @@ def admin_dashboard():
 
     if current_user.role != "admin":
 
-        flash("Access denied.")
+        flash(
+            "Access denied."
+        )
 
         return redirect(
             url_for("dashboard")
@@ -170,16 +209,38 @@ def admin_dashboard():
 
     total_issues = Issue.query.count()
 
+
     pending_issues = Issue.query.filter_by(
         status="Pending"
     ).count()
+
 
     in_progress_issues = Issue.query.filter_by(
         status="In Progress"
     ).count()
 
+
     resolved_issues = Issue.query.filter_by(
         status="Resolved"
+    ).count()
+
+
+    # --------------------------------
+    # Priority statistics
+    # --------------------------------
+
+    high_priority = Issue.query.filter_by(
+        priority="High"
+    ).count()
+
+
+    medium_priority = Issue.query.filter_by(
+        priority="Medium"
+    ).count()
+
+
+    low_priority = Issue.query.filter_by(
+        priority="Low"
     ).count()
 
 
@@ -190,6 +251,7 @@ def admin_dashboard():
     all_issues = Issue.query.all()
 
     category_counts = {}
+
 
     for issue in all_issues:
 
@@ -237,14 +299,29 @@ def admin_dashboard():
 
 
     return render_template(
+
         "admin_dashboard.html",
+
         issues=issues,
+
         selected_status=selected_status,
+
         total_issues=total_issues,
+
         pending_issues=pending_issues,
+
         in_progress_issues=in_progress_issues,
+
         resolved_issues=resolved_issues,
+
+        high_priority=high_priority,
+
+        medium_priority=medium_priority,
+
+        low_priority=low_priority,
+
         category_counts=category_counts
+
     )
 
 
@@ -257,7 +334,9 @@ def update_issue_status(issue_id):
 
     if current_user.role != "admin":
 
-        flash("Access denied.")
+        flash(
+            "Access denied."
+        )
 
         return redirect(
             url_for("dashboard")
@@ -269,13 +348,20 @@ def update_issue_status(issue_id):
     )
 
 
-    new_status = request.form["status"]
+    new_status = request.form[
+        "status"
+    ]
+
 
     issue.status = new_status
 
+
     issue.updated_at = datetime.now(
         timezone.utc
-    ).replace(tzinfo=None)
+    ).replace(
+        tzinfo=None
+    )
+
 
     db.session.commit()
 
@@ -286,13 +372,95 @@ def update_issue_status(issue_id):
 
 
     return redirect(
+
         url_for(
+
             "admin_dashboard",
+
             status=request.form.get(
                 "current_filter",
                 "All"
             )
+
         )
+
+    )
+
+
+@app.route(
+    "/admin/update-priority/<int:issue_id>",
+    methods=["POST"]
+)
+@login_required
+def update_issue_priority(issue_id):
+
+    if current_user.role != "admin":
+
+        flash(
+            "Access denied."
+        )
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+
+    issue = Issue.query.get_or_404(
+        issue_id
+    )
+
+
+    new_priority = request.form[
+        "priority"
+    ]
+
+
+    if new_priority not in [
+        "High",
+        "Medium",
+        "Low"
+    ]:
+
+        flash(
+            "Invalid priority selected."
+        )
+
+        return redirect(
+            url_for("admin_dashboard")
+        )
+
+
+    issue.priority = new_priority
+
+
+    issue.updated_at = datetime.now(
+        timezone.utc
+    ).replace(
+        tzinfo=None
+    )
+
+
+    db.session.commit()
+
+
+    flash(
+        "Issue priority updated successfully."
+    )
+
+
+    return redirect(
+
+        url_for(
+
+            "admin_dashboard",
+
+            status=request.form.get(
+                "current_filter",
+                "All"
+            )
+
+        )
+
     )
 
 
@@ -308,4 +476,7 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        debug=True
+    )

@@ -38,7 +38,6 @@
     </nav>
 
 
-
     <section class="dashboard-container">
 
 
@@ -50,7 +49,6 @@
         <p>
             Manage and track civic issues reported by citizens.
         </p>
-
 
 
         <!-- Flash Messages -->
@@ -143,6 +141,63 @@
 
 
 
+        <!-- Priority Overview -->
+
+        <div class="dashboard-card">
+
+            <h2>
+                Priority Overview
+            </h2>
+
+
+            <div class="stats-container">
+
+
+                <div class="stat-card">
+
+                    <h3>
+                        🔴 High
+                    </h3>
+
+                    <p>
+                        {{ high_priority }}
+                    </p>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <h3>
+                        🟡 Medium
+                    </h3>
+
+                    <p>
+                        {{ medium_priority }}
+                    </p>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <h3>
+                        🟢 Low
+                    </h3>
+
+                    <p>
+                        {{ low_priority }}
+                    </p>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
         <!-- Category Overview -->
 
         <div class="dashboard-card">
@@ -154,12 +209,10 @@
 
             {% if category_counts %}
 
-
                 <div class="category-list">
 
 
                     {% for category, count in category_counts.items() %}
-
 
                         <div class="category-item">
 
@@ -173,12 +226,10 @@
 
                         </div>
 
-
                     {% endfor %}
 
 
                 </div>
-
 
             {% else %}
 
@@ -255,7 +306,7 @@
 
 
 
-        <!-- Issues List -->
+        <!-- Issues -->
 
         <div class="dashboard-card">
 
@@ -348,6 +399,17 @@
                         <p>
 
                             <strong>
+                                Priority:
+                            </strong>
+
+                            {{ issue.priority }}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
                                 Last Updated:
                             </strong>
 
@@ -357,7 +419,7 @@
 
 
 
-                        <!-- Update Status -->
+                        <!-- Status Update -->
 
                         <form
                             method="POST"
@@ -386,7 +448,6 @@
                             </label>
 
 
-
                             <select
                                 id="status-{{ issue.id }}"
                                 name="status"
@@ -400,11 +461,8 @@
                                         selected
                                     {% endif %}
                                 >
-
                                     Pending
-
                                 </option>
-
 
 
                                 <option
@@ -414,11 +472,8 @@
                                         selected
                                     {% endif %}
                                 >
-
                                     In Progress
-
                                 </option>
-
 
 
                                 <option
@@ -428,23 +483,101 @@
                                         selected
                                     {% endif %}
                                 >
-
                                     Resolved
-
                                 </option>
 
 
                             </select>
 
 
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                Update Status
+                            </button>
+
+
+                        </form>
+
+
+
+                        <!-- Priority Update -->
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'update_issue_priority',
+                                issue_id=issue.id
+                            ) }}"
+                        >
+
+
+                            <input
+                                type="hidden"
+                                name="current_filter"
+                                value="{{ selected_status }}"
+                            >
+
+
+                            <label
+                                for="priority-{{ issue.id }}"
+                            >
+
+                                <strong>
+                                    Change Priority:
+                                </strong>
+
+                            </label>
+
+
+                            <select
+                                id="priority-{{ issue.id }}"
+                                name="priority"
+                            >
+
+
+                                <option
+                                    value="High"
+
+                                    {% if issue.priority == "High" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    🔴 High
+                                </option>
+
+
+                                <option
+                                    value="Medium"
+
+                                    {% if issue.priority == "Medium" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    🟡 Medium
+                                </option>
+
+
+                                <option
+                                    value="Low"
+
+                                    {% if issue.priority == "Low" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    🟢 Low
+                                </option>
+
+
+                            </select>
+
 
                             <button
                                 type="submit"
                                 class="btn btn-primary"
                             >
-
-                                Update Status
-
+                                Update Priority
                             </button>
 
 
