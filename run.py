@@ -165,7 +165,7 @@ def admin_dashboard():
 
 
     # --------------------------------
-    # Dashboard statistics
+    # Issue statistics
     # --------------------------------
 
     total_issues = Issue.query.count()
@@ -181,6 +181,34 @@ def admin_dashboard():
     resolved_issues = Issue.query.filter_by(
         status="Resolved"
     ).count()
+
+
+    # --------------------------------
+    # Category statistics
+    # --------------------------------
+
+    all_issues = Issue.query.all()
+
+    category_counts = {}
+
+    for issue in all_issues:
+
+        category = issue.category
+
+        if category not in category_counts:
+
+            category_counts[category] = 0
+
+        category_counts[category] += 1
+
+
+    category_counts = dict(
+        sorted(
+            category_counts.items(),
+            key=lambda item: item[1],
+            reverse=True
+        )
+    )
 
 
     # --------------------------------
@@ -215,7 +243,8 @@ def admin_dashboard():
         total_issues=total_issues,
         pending_issues=pending_issues,
         in_progress_issues=in_progress_issues,
-        resolved_issues=resolved_issues
+        resolved_issues=resolved_issues,
+        category_counts=category_counts
     )
 
 

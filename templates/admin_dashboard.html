@@ -73,7 +73,7 @@
 
 
 
-        <!-- Dashboard Statistics -->
+        <!-- Issue Overview -->
 
         <div class="dashboard-card">
 
@@ -84,8 +84,6 @@
 
             <div class="stats-container">
 
-
-                <!-- Total -->
 
                 <div class="stat-card">
 
@@ -100,8 +98,6 @@
                 </div>
 
 
-                <!-- Pending -->
-
                 <div class="stat-card">
 
                     <h3>
@@ -115,8 +111,6 @@
                 </div>
 
 
-                <!-- In Progress -->
-
                 <div class="stat-card">
 
                     <h3>
@@ -129,8 +123,6 @@
 
                 </div>
 
-
-                <!-- Resolved -->
 
                 <div class="stat-card">
 
@@ -146,6 +138,56 @@
 
 
             </div>
+
+        </div>
+
+
+
+        <!-- Category Overview -->
+
+        <div class="dashboard-card">
+
+            <h2>
+                Category Overview
+            </h2>
+
+
+            {% if category_counts %}
+
+
+                <div class="category-list">
+
+
+                    {% for category, count in category_counts.items() %}
+
+
+                        <div class="category-item">
+
+                            <span>
+                                {{ category }}
+                            </span>
+
+                            <strong>
+                                {{ count }}
+                            </strong>
+
+                        </div>
+
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            {% else %}
+
+                <p>
+                    No categories available yet.
+                </p>
+
+            {% endif %}
+
 
         </div>
 
