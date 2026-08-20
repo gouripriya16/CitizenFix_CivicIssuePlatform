@@ -1,0 +1,40 @@
+title,description,category,priority
+Large pothole on main road,Causing accidents and dangerous for vehicles, Roads,High
+Open manhole near school,Children could fall into the open manhole, Roads,High
+Road completely blocked,The road is blocked and emergency vehicles cannot pass, Roads,High
+Severe road damage,Large damaged section causing accidents, Roads,High
+Major pothole near hospital,Very dangerous for ambulances and vehicles, Roads,High
+Broken bridge,Bridge is damaged and unsafe for public use, Roads,High
+Small pothole,Minor pothole that does not cause major problems, Roads,Low
+Faded road markings,Road markings are difficult to see, Roads,Low
+Minor road crack,Small crack on the road with limited impact, Roads,Low
+Garbage overflowing,Garbage has accumulated and is creating an unhealthy environment, Garbage,Medium
+Garbage not collected for many days,Waste has accumulated and causing a bad smell, Garbage,Medium
+Large garbage pile near school,Large amount of waste creating health concerns, Garbage,High
+Small amount of garbage,Small amount of waste that needs routine collection, Garbage,Low
+Garbage bin damaged,One garbage bin is damaged but other bins are available, Garbage,Low
+Water pipe leakage,Water is continuously leaking near the main road, Water,Medium
+Major water pipeline burst,Large amount of water is flooding the road, Water,High
+Water flooding street,Flooding is blocking traffic and damaging property, Water,High
+Small water leakage,Minor leakage that can be repaired during routine maintenance, Water,Low
+Water tap leaking,Small leak from a public water tap, Water,Low
+Streetlight not working,Area becomes dark at night and pedestrians have difficulty, Streetlights,Medium
+Multiple streetlights not working,Large area is completely dark at night, Streetlights,High
+Broken streetlight near school,Children and pedestrians cannot safely use the area at night, Streetlights,High
+Flickering streetlight,Streetlight works intermittently but needs maintenance, Streetlights,Low
+Minor streetlight damage,Light is slightly damaged but still working, Streetlights,Low
+Open electrical wire,Exposed electrical wire could cause electric shock, Streetlights,High
+Damaged public bench,Bench is damaged but does not create immediate danger, Public Facilities,Low
+Broken park equipment,Playground equipment is damaged and needs repair, Public Facilities,Medium
+Dangerous playground equipment,Children could get injured using damaged equipment, Public Facilities,High
+Broken public toilet,Public toilet is not functioning properly, Public Facilities,Medium
+Minor park maintenance issue,Small maintenance issue in public park, Public Facilities,Low
+Stray animals blocking road,Animals are blocking traffic and could cause accidents, Stray Animals,High
+Stray dogs near school,Stray dogs are creating a safety concern for children, Stray Animals,High
+Stray animals in residential area,Animals are causing inconvenience to residents, Stray Animals,Medium
+Single stray animal sighting,One animal was seen but no immediate danger exists, Stray Animals,Low
+Damaged traffic signal,Traffic signal is not working and could cause accidents, Traffic,High
+Traffic signal malfunction,Signal is working incorrectly and causing traffic problems, Traffic,High
+Broken pedestrian signal,Pedestrians cannot safely cross the road, Traffic,Medium
+Faded traffic sign,Traffic sign is difficult to read but still visible, Traffic,Low
+Minor public sign damage,Small damage to a public information sign, Other,Low

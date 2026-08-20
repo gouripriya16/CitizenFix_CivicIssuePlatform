@@ -1,67 +1,72 @@
-def predict_priority(title, description, category):
-    """
-    Predict the priority of a civic issue.
+import os
 
-    Returns:
-        High, Medium, or Low
-    """
+import joblib
 
-    title = title.lower().strip()
-    description = description.lower().strip()
-    category = category.lower().strip()
 
-    text = f"{title} {description} {category}"
+# --------------------------------------------------
+# Find the trained ML model
+# --------------------------------------------------
 
-    high_keywords = [
-        "danger",
-        "dangerous",
-        "accident",
-        "accidents",
-        "injury",
-        "injuries",
-        "blocked",
-        "flood",
-        "flooding",
-        "fire",
-        "electric shock",
-        "electrical hazard",
-        "major pothole",
-        "large pothole",
-        "severe",
-        "emergency",
-        "broken bridge",
-        "open manhole"
-    ]
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
 
-    medium_keywords = [
-        "leak",
-        "leakage",
-        "garbage",
-        "waste",
-        "overflow",
-        "not working",
-        "damaged",
-        "damage",
-        "crack",
-        "water pipe",
-        "streetlight"
-    ]
+MODEL_FILE = os.path.join(
+    BASE_DIR,
+    "models",
+    "priority_model.pkl"
+)
 
-    for keyword in high_keywords:
 
-        if keyword in text:
-            return "High"
+# --------------------------------------------------
+# Load the model once when Flask starts
+# --------------------------------------------------
 
-    for keyword in medium_keywords:
+if not os.path.exists(MODEL_FILE):
 
-        if keyword in text:
-            return "Medium"
+    raise FileNotFoundError(
+        f"Priority model not found: {MODEL_FILE}"
+    )
 
-    if category in [
-        "roads",
-        "water",
-        "streetlights"
-    ]:
-        return "Medium"
 
-    return "Low"
+model = joblib.load(
+    MODEL_FILE
+)
+
+
+# --------------------------------------------------
+# Predict issue priority
+# --------------------------------------------------
+
+def predict_priority(
+    title,
+    description,
+    category
+):
+
+    title = str(title).strip()
+
+    description = str(description).strip()
+
+    category = str(category).strip()
+
+
+    # Combine all issue information
+    issue_text = (
+        title
+        + " "
+        + description
+        + " "
+        + category
+    )
+
+
+    # Ask the trained ML model
+    prediction = model.predict(
+        [issue_text]
+    )
+
+
+    return prediction[0]
