@@ -164,6 +164,29 @@ def admin_dashboard():
         )
 
 
+    # --------------------------------
+    # Dashboard statistics
+    # --------------------------------
+
+    total_issues = Issue.query.count()
+
+    pending_issues = Issue.query.filter_by(
+        status="Pending"
+    ).count()
+
+    in_progress_issues = Issue.query.filter_by(
+        status="In Progress"
+    ).count()
+
+    resolved_issues = Issue.query.filter_by(
+        status="Resolved"
+    ).count()
+
+
+    # --------------------------------
+    # Status filter
+    # --------------------------------
+
     selected_status = request.args.get(
         "status",
         "All"
@@ -188,7 +211,11 @@ def admin_dashboard():
     return render_template(
         "admin_dashboard.html",
         issues=issues,
-        selected_status=selected_status
+        selected_status=selected_status,
+        total_issues=total_issues,
+        pending_issues=pending_issues,
+        in_progress_issues=in_progress_issues,
+        resolved_issues=resolved_issues
     )
 
 

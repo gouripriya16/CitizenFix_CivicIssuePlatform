@@ -2,16 +2,24 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Admin Dashboard - CitizenFix</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
+
 <body>
+
+
+    <!-- Navigation -->
 
     <nav class="navbar">
 
@@ -20,20 +28,32 @@
         </div>
 
         <div class="nav-links">
-            <a href="{{ url_for('logout') }}">Logout</a>
+
+            <a href="{{ url_for('logout') }}">
+                Logout
+            </a>
+
         </div>
 
     </nav>
 
 
+
     <section class="dashboard-container">
 
-        <h1>Admin Dashboard</h1>
+
+        <h1>
+            Admin Dashboard
+        </h1>
+
 
         <p>
             Manage and track civic issues reported by citizens.
         </p>
 
+
+
+        <!-- Flash Messages -->
 
         {% with messages = get_flashed_messages() %}
 
@@ -52,158 +72,365 @@
         {% endwith %}
 
 
-        <!-- Issue Filters -->
+
+        <!-- Dashboard Statistics -->
 
         <div class="dashboard-card">
 
-            <h2>Filter Issues</h2>
+            <h2>
+                Issue Overview
+            </h2>
 
-            <div class="filter-buttons">
 
-                <a href="{{ url_for('admin_dashboard', status='All') }}"
-                   class="btn">
-                    All
-                </a>
+            <div class="stats-container">
 
-                <a href="{{ url_for('admin_dashboard', status='Pending') }}"
-                   class="btn">
-                    Pending
-                </a>
 
-                <a href="{{ url_for('admin_dashboard', status='In Progress') }}"
-                   class="btn">
-                    In Progress
-                </a>
+                <!-- Total -->
 
-                <a href="{{ url_for('admin_dashboard', status='Resolved') }}"
-                   class="btn">
-                    Resolved
-                </a>
+                <div class="stat-card">
+
+                    <h3>
+                        Total Issues
+                    </h3>
+
+                    <p>
+                        {{ total_issues }}
+                    </p>
+
+                </div>
+
+
+                <!-- Pending -->
+
+                <div class="stat-card">
+
+                    <h3>
+                        Pending
+                    </h3>
+
+                    <p>
+                        {{ pending_issues }}
+                    </p>
+
+                </div>
+
+
+                <!-- In Progress -->
+
+                <div class="stat-card">
+
+                    <h3>
+                        In Progress
+                    </h3>
+
+                    <p>
+                        {{ in_progress_issues }}
+                    </p>
+
+                </div>
+
+
+                <!-- Resolved -->
+
+                <div class="stat-card">
+
+                    <h3>
+                        Resolved
+                    </h3>
+
+                    <p>
+                        {{ resolved_issues }}
+                    </p>
+
+                </div>
+
 
             </div>
 
         </div>
 
 
-        <!-- Issues -->
+
+        <!-- Issue Filters -->
 
         <div class="dashboard-card">
 
             <h2>
-                {% if selected_status == "All" %}
-                    All Reported Issues
-                {% else %}
-                    {{ selected_status }} Issues
-                {% endif %}
+                Filter Issues
             </h2>
+
+
+            <div class="filter-buttons">
+
+
+                <a
+                    href="{{ url_for(
+                        'admin_dashboard',
+                        status='All'
+                    ) }}"
+                    class="btn"
+                >
+                    All
+                </a>
+
+
+                <a
+                    href="{{ url_for(
+                        'admin_dashboard',
+                        status='Pending'
+                    ) }}"
+                    class="btn"
+                >
+                    Pending
+                </a>
+
+
+                <a
+                    href="{{ url_for(
+                        'admin_dashboard',
+                        status='In Progress'
+                    ) }}"
+                    class="btn"
+                >
+                    In Progress
+                </a>
+
+
+                <a
+                    href="{{ url_for(
+                        'admin_dashboard',
+                        status='Resolved'
+                    ) }}"
+                    class="btn"
+                >
+                    Resolved
+                </a>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Issues List -->
+
+        <div class="dashboard-card">
+
+
+            <h2>
+
+                {% if selected_status == "All" %}
+
+                    All Reported Issues
+
+                {% else %}
+
+                    {{ selected_status }} Issues
+
+                {% endif %}
+
+            </h2>
+
 
 
             {% if issues %}
 
+
                 {% for issue in issues %}
 
+
                     <div class="issue-card">
+
 
                         <h3>
                             🛠️ {{ issue.title }}
                         </h3>
 
+
                         <p>
-                            <strong>Description:</strong>
+
+                            <strong>
+                                Description:
+                            </strong>
+
                             {{ issue.description }}
+
                         </p>
 
+
                         <p>
-                            <strong>Category:</strong>
+
+                            <strong>
+                                Category:
+                            </strong>
+
                             {{ issue.category }}
+
                         </p>
 
+
                         <p>
-                            <strong>Location:</strong>
+
+                            <strong>
+                                Location:
+                            </strong>
+
                             {{ issue.location }}
+
                         </p>
 
+
                         <p>
-                            <strong>Reported On:</strong>
+
+                            <strong>
+                                Reported On:
+                            </strong>
+
                             {{ issue.created_at | india_time }}
+
                         </p>
 
+
                         <p>
-                            <strong>Status:</strong>
+
+                            <strong>
+                                Status:
+                            </strong>
+
                             {{ issue.status }}
+
                         </p>
+
 
                         <p>
-                            <strong>Last Updated:</strong>
+
+                            <strong>
+                                Last Updated:
+                            </strong>
+
                             {{ issue.updated_at | india_time }}
+
                         </p>
 
 
-                        <form method="POST"
-                              action="{{ url_for('update_issue_status', issue_id=issue.id) }}">
 
-                            <input type="hidden"
-                                   name="current_filter"
-                                   value="{{ selected_status }}">
+                        <!-- Update Status -->
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'update_issue_status',
+                                issue_id=issue.id
+                            ) }}"
+                        >
 
 
-                            <label for="status-{{ issue.id }}">
-                                <strong>Change Status:</strong>
+                            <input
+                                type="hidden"
+                                name="current_filter"
+                                value="{{ selected_status }}"
+                            >
+
+
+                            <label
+                                for="status-{{ issue.id }}"
+                            >
+
+                                <strong>
+                                    Change Status:
+                                </strong>
+
                             </label>
 
 
-                            <select id="status-{{ issue.id }}"
-                                    name="status">
 
-                                <option value="Pending"
+                            <select
+                                id="status-{{ issue.id }}"
+                                name="status"
+                            >
+
+
+                                <option
+                                    value="Pending"
+
                                     {% if issue.status == "Pending" %}
                                         selected
-                                    {% endif %}>
+                                    {% endif %}
+                                >
+
                                     Pending
+
                                 </option>
 
 
-                                <option value="In Progress"
+
+                                <option
+                                    value="In Progress"
+
                                     {% if issue.status == "In Progress" %}
                                         selected
-                                    {% endif %}>
+                                    {% endif %}
+                                >
+
                                     In Progress
+
                                 </option>
 
 
-                                <option value="Resolved"
+
+                                <option
+                                    value="Resolved"
+
                                     {% if issue.status == "Resolved" %}
                                         selected
-                                    {% endif %}>
+                                    {% endif %}
+                                >
+
                                     Resolved
+
                                 </option>
+
 
                             </select>
 
 
-                            <button type="submit"
-                                    class="btn btn-primary">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+
                                 Update Status
+
                             </button>
+
 
                         </form>
 
+
                     </div>
+
 
                 {% endfor %}
 
 
             {% else %}
 
+
                 <p>
                     No issues found for this status.
                 </p>
 
+
             {% endif %}
+
 
         </div>
 
+
     </section>
+
 
 </body>
 
