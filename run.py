@@ -12,6 +12,7 @@ from flask import request, redirect, url_for, flash
 from app import create_app, db
 from app.models import User, Issue
 from app.time_utils import format_india_time
+from app.priority_predictor import predict_priority
 
 
 app = create_app()
@@ -149,6 +150,17 @@ def report_issue():
         ].strip()
 
 
+        # --------------------------------
+        # Automatic priority prediction
+        # --------------------------------
+
+        predicted_priority = predict_priority(
+            title,
+            description,
+            category
+        )
+
+
         issue = Issue(
 
             title=title,
@@ -159,7 +171,7 @@ def report_issue():
 
             location=location,
 
-            priority="Medium",
+            priority=predicted_priority,
 
             status="Pending",
 
@@ -174,7 +186,8 @@ def report_issue():
 
 
         flash(
-            "Issue reported successfully."
+            f"Issue reported successfully. "
+            f"Suggested priority: {predicted_priority}."
         )
 
 
