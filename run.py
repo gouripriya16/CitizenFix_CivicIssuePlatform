@@ -1,22 +1,33 @@
 from datetime import datetime, timezone
 
-from flask import render_template
+from flask import (
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash
+)
+
 from flask_login import (
     login_user,
     logout_user,
     login_required,
     current_user
 )
-from flask import request, redirect, url_for, flash
 
 from app import create_app, db
 from app.models import User, Issue
 from app.time_utils import format_india_time
 from app.priority_predictor import predict_priority
+from app.duplicate_detector import find_possible_duplicate
 
 
 app = create_app()
 
+
+# ==========================================================
+# INDIA TIME FILTER
+# ==========================================================
 
 @app.template_filter("india_time")
 def india_time_filter(value):
@@ -24,20 +35,39 @@ def india_time_filter(value):
     return format_india_time(value)
 
 
+# ==========================================================
+# HOME
+# ==========================================================
+
 @app.route("/")
 def home():
 
-    return render_template("index.html")
+    return render_template(
+        "index.html"
+    )
 
 
-@app.route("/register", methods=["GET", "POST"])
+# ==========================================================
+# REGISTER
+# ==========================================================
+
+@app.route(
+    "/register",
+    methods=["GET", "POST"]
+)
 def register():
 
     if request.method == "POST":
 
         name = request.form["name"].strip()
-        email = request.form["email"].strip().lower()
-        password = request.form["password"]
+
+        email = request.form[
+            "email"
+        ].strip().lower()
+
+        password = request.form[
+            "password"
+        ]
 
         existing_user = User.query.filter_by(
             email=email
@@ -45,7 +75,9 @@ def register():
 
         if existing_user:
 
-            flash("Email already registered.")
+            flash(
+                "Email already registered."
+            )
 
             return redirect(
                 url_for("register")
@@ -60,6 +92,7 @@ def register():
         user.set_password(password)
 
         db.session.add(user)
+
         db.session.commit()
 
         flash(
@@ -75,13 +108,25 @@ def register():
     )
 
 
-@app.route("/login", methods=["GET", "POST"])
+# ==========================================================
+# LOGIN
+# ==========================================================
+
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
 def login():
 
     if request.method == "POST":
 
-        email = request.form["email"].strip().lower()
-        password = request.form["password"]
+        email = request.form[
+            "email"
+        ].strip().lower()
+
+        password = request.form[
+            "password"
+        ]
 
         user = User.query.filter_by(
             email=email
@@ -94,11 +139,15 @@ def login():
             if user.role == "admin":
 
                 return redirect(
-                    url_for("admin_dashboard")
+                    url_for(
+                        "admin_dashboard"
+                    )
                 )
 
             return redirect(
-                url_for("dashboard")
+                url_for(
+                    "dashboard"
+                )
             )
 
         flash(
@@ -109,6 +158,10 @@ def login():
         "login.html"
     )
 
+
+# ==========================================================
+# CITIZEN DASHBOARD
+# ==========================================================
 
 @app.route("/dashboard")
 @login_required
@@ -126,6 +179,10 @@ def dashboard():
     )
 
 
+# ==========================================================
+# REPORT ISSUE
+# ==========================================================
+
 @app.route(
     "/report-issue",
     methods=["GET", "POST"]
@@ -135,7 +192,9 @@ def report_issue():
 
     if request.method == "POST":
 
-        title = request.form["title"].strip()
+        title = request.form[
+            "title"
+        ].strip()
 
         description = request.form[
             "description"
@@ -143,16 +202,56 @@ def report_issue():
 
         category = request.form[
             "category"
-        ]
+        ].strip()
 
         location = request.form[
             "location"
         ].strip()
 
 
-        # --------------------------------
-        # Automatic priority prediction
-        # --------------------------------
+        # --------------------------------------------------
+        # DUPLICATE DETECTION
+        # --------------------------------------------------
+
+        existing_issues = Issue.query.all()
+
+        duplicate_result = find_possible_duplicate(
+            title,
+            description,
+            category,
+            location,
+            existing_issues
+        )
+
+
+        # --------------------------------------------------
+        # If duplicate is found
+        # --------------------------------------------------
+
+        if duplicate_result["is_duplicate"]:
+
+            duplicate_issue = duplicate_result["issue"]
+
+            score = duplicate_result["score"] * 100
+
+            flash(
+                f"Possible duplicate issue detected. "
+                f"This appears similar to: "
+                f"'{duplicate_issue.title}' "
+                f"({score:.0f}% similarity). "
+                f"Please check before submitting."
+            )
+
+            return redirect(
+                url_for(
+                    "report_issue"
+                )
+            )
+
+
+        # --------------------------------------------------
+        # AUTOMATIC PRIORITY PREDICTION
+        # --------------------------------------------------
 
         predicted_priority = predict_priority(
             title,
@@ -160,6 +259,10 @@ def report_issue():
             category
         )
 
+
+        # --------------------------------------------------
+        # CREATE ISSUE
+        # --------------------------------------------------
 
         issue = Issue(
 
@@ -187,12 +290,15 @@ def report_issue():
 
         flash(
             f"Issue reported successfully. "
-            f"Suggested priority: {predicted_priority}."
+            f"Suggested priority: "
+            f"{predicted_priority}."
         )
 
 
         return redirect(
-            url_for("dashboard")
+            url_for(
+                "dashboard"
+            )
         )
 
 
@@ -200,6 +306,10 @@ def report_issue():
         "report_issue.html"
     )
 
+
+# ==========================================================
+# ADMIN DASHBOARD
+# ==========================================================
 
 @app.route("/admin/dashboard")
 @login_required
@@ -216,50 +326,45 @@ def admin_dashboard():
         )
 
 
-    # --------------------------------
-    # Issue statistics
-    # --------------------------------
+    # --------------------------------------------------
+    # ISSUE STATISTICS
+    # --------------------------------------------------
 
     total_issues = Issue.query.count()
-
 
     pending_issues = Issue.query.filter_by(
         status="Pending"
     ).count()
 
-
     in_progress_issues = Issue.query.filter_by(
         status="In Progress"
     ).count()
-
 
     resolved_issues = Issue.query.filter_by(
         status="Resolved"
     ).count()
 
 
-    # --------------------------------
-    # Priority statistics
-    # --------------------------------
+    # --------------------------------------------------
+    # PRIORITY STATISTICS
+    # --------------------------------------------------
 
     high_priority = Issue.query.filter_by(
         priority="High"
     ).count()
 
-
     medium_priority = Issue.query.filter_by(
         priority="Medium"
     ).count()
-
 
     low_priority = Issue.query.filter_by(
         priority="Low"
     ).count()
 
 
-    # --------------------------------
-    # Category statistics
-    # --------------------------------
+    # --------------------------------------------------
+    # CATEGORY STATISTICS
+    # --------------------------------------------------
 
     all_issues = Issue.query.all()
 
@@ -286,9 +391,9 @@ def admin_dashboard():
     )
 
 
-    # --------------------------------
-    # Status filter
-    # --------------------------------
+    # --------------------------------------------------
+    # STATUS FILTER
+    # --------------------------------------------------
 
     selected_status = request.args.get(
         "status",
@@ -337,6 +442,10 @@ def admin_dashboard():
 
     )
 
+
+# ==========================================================
+# UPDATE ISSUE STATUS
+# ==========================================================
 
 @app.route(
     "/admin/update-issue/<int:issue_id>",
@@ -400,6 +509,10 @@ def update_issue_status(issue_id):
     )
 
 
+# ==========================================================
+# UPDATE ISSUE PRIORITY
+# ==========================================================
+
 @app.route(
     "/admin/update-priority/<int:issue_id>",
     methods=["POST"]
@@ -439,7 +552,9 @@ def update_issue_priority(issue_id):
         )
 
         return redirect(
-            url_for("admin_dashboard")
+            url_for(
+                "admin_dashboard"
+            )
         )
 
 
@@ -477,6 +592,10 @@ def update_issue_priority(issue_id):
     )
 
 
+# ==========================================================
+# LOGOUT
+# ==========================================================
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -487,6 +606,10 @@ def logout():
         url_for("home")
     )
 
+
+# ==========================================================
+# RUN APPLICATION
+# ==========================================================
 
 if __name__ == "__main__":
 
