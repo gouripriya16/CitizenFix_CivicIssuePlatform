@@ -16,3 +16,4 @@ instance/
 
 # Pytest cache
 .pytest_cache/
+static/uploads/*
