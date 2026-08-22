@@ -82,6 +82,15 @@ class Issue(db.Model):
         nullable=False
     )
 
+    # ==========================================================
+    # IMAGE
+    # ==========================================================
+
+    image_filename = db.Column(
+        db.String(255),
+        nullable=True
+    )
+
     status = db.Column(
         db.String(50),
         nullable=False,

@@ -1,3 +1,5 @@
+import os
+import uuid
 from datetime import datetime, timezone
 
 from flask import (
@@ -15,6 +17,8 @@ from flask_login import (
     current_user
 )
 
+from werkzeug.utils import secure_filename
+
 from app import create_app, db
 from app.models import User, Issue
 from app.time_utils import format_india_time
@@ -23,6 +27,26 @@ from app.duplicate_detector import find_possible_duplicate
 
 
 app = create_app()
+
+
+# ==========================================================
+# ALLOWED IMAGE EXTENSIONS
+# ==========================================================
+
+ALLOWED_EXTENSIONS = {
+    "png",
+    "jpg",
+    "jpeg"
+}
+
+
+def allowed_file(filename):
+
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower()
+        in ALLOWED_EXTENSIONS
+    )
 
 
 # ==========================================================
@@ -76,7 +100,8 @@ def register():
         if existing_user:
 
             flash(
-                "Email already registered."
+                "Email already registered.",
+                "error"
             )
 
             return redirect(
@@ -96,7 +121,8 @@ def register():
         db.session.commit()
 
         flash(
-            "Registration successful. Please login."
+            "Registration successful. Please login.",
+            "success"
         )
 
         return redirect(
@@ -151,7 +177,8 @@ def login():
             )
 
         flash(
-            "Invalid email or password."
+            "Invalid email or password.",
+            "error"
         )
 
     return render_template(
@@ -209,9 +236,39 @@ def report_issue():
         ].strip()
 
 
-        # --------------------------------------------------
+        # ==================================================
+        # GET IMAGE
+        # ==================================================
+
+        image = request.files.get(
+            "image"
+        )
+
+
+        # ==================================================
+        # VALIDATE IMAGE
+        # ==================================================
+
+        if image and image.filename:
+
+            if not allowed_file(
+                image.filename
+            ):
+
+                flash(
+                    "Invalid image format. "
+                    "Please upload a JPG or PNG image.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("report_issue")
+                )
+
+
+        # ==================================================
         # DUPLICATE DETECTION
-        # --------------------------------------------------
+        # ==================================================
 
         existing_issues = Issue.query.all()
 
@@ -224,10 +281,6 @@ def report_issue():
         )
 
 
-        # --------------------------------------------------
-        # If duplicate is found
-        # --------------------------------------------------
-
         if duplicate_result["is_duplicate"]:
 
             duplicate_issue = duplicate_result["issue"]
@@ -239,19 +292,18 @@ def report_issue():
                 f"This appears similar to: "
                 f"'{duplicate_issue.title}' "
                 f"({score:.0f}% similarity). "
-                f"Please check before submitting."
+                f"Please check before submitting.",
+                "warning"
             )
 
             return redirect(
-                url_for(
-                    "report_issue"
-                )
+                url_for("report_issue")
             )
 
 
-        # --------------------------------------------------
-        # AUTOMATIC PRIORITY PREDICTION
-        # --------------------------------------------------
+        # ==================================================
+        # PRIORITY PREDICTION
+        # ==================================================
 
         predicted_priority = predict_priority(
             title,
@@ -260,45 +312,85 @@ def report_issue():
         )
 
 
-        # --------------------------------------------------
+        # ==================================================
+        # SAVE IMAGE
+        # ==================================================
+
+        image_filename = None
+
+        if image and image.filename:
+
+            original_filename = secure_filename(
+                image.filename
+            )
+
+            file_extension = original_filename.rsplit(
+                ".",
+                1
+            )[1].lower()
+
+            unique_filename = (
+                f"{uuid.uuid4().hex}.{file_extension}"
+            )
+
+            image_path = os.path.join(
+                app.config["UPLOAD_FOLDER"],
+                unique_filename
+            )
+
+            image.save(
+                image_path
+            )
+
+            image_filename = unique_filename
+
+
+        # ==================================================
         # CREATE ISSUE
-        # --------------------------------------------------
+        # ==================================================
 
         issue = Issue(
-
             title=title,
-
             description=description,
-
             category=category,
-
             location=location,
-
+            image_filename=image_filename,
             priority=predicted_priority,
-
             status="Pending",
-
             user_id=current_user.id
-
         )
-
 
         db.session.add(issue)
 
         db.session.commit()
 
 
-        flash(
-            f"Issue reported successfully. "
-            f"Suggested priority: "
-            f"{predicted_priority}."
-        )
+        # ==================================================
+        # SUCCESS MESSAGE
+        # ==================================================
+
+        if image_filename:
+
+            flash(
+                f"Issue reported successfully. "
+                f"Suggested priority: "
+                f"{predicted_priority}. "
+                f"Photo uploaded successfully.",
+                "success"
+            )
+
+        else:
+
+            flash(
+                f"Issue reported successfully. "
+                f"Suggested priority: "
+                f"{predicted_priority}.",
+                "success"
+            )
 
 
         return redirect(
-            url_for(
-                "dashboard"
-            )
+            url_for("dashboard")
         )
 
 
@@ -318,7 +410,8 @@ def admin_dashboard():
     if current_user.role != "admin":
 
         flash(
-            "Access denied."
+            "Access denied.",
+            "error"
         )
 
         return redirect(
@@ -326,9 +419,9 @@ def admin_dashboard():
         )
 
 
-    # --------------------------------------------------
+    # ======================================================
     # ISSUE STATISTICS
-    # --------------------------------------------------
+    # ======================================================
 
     total_issues = Issue.query.count()
 
@@ -345,9 +438,9 @@ def admin_dashboard():
     ).count()
 
 
-    # --------------------------------------------------
+    # ======================================================
     # PRIORITY STATISTICS
-    # --------------------------------------------------
+    # ======================================================
 
     high_priority = Issue.query.filter_by(
         priority="High"
@@ -362,14 +455,13 @@ def admin_dashboard():
     ).count()
 
 
-    # --------------------------------------------------
+    # ======================================================
     # CATEGORY STATISTICS
-    # --------------------------------------------------
+    # ======================================================
 
     all_issues = Issue.query.all()
 
     category_counts = {}
-
 
     for issue in all_issues:
 
@@ -391,9 +483,9 @@ def admin_dashboard():
     )
 
 
-    # --------------------------------------------------
+    # ======================================================
     # STATUS FILTER
-    # --------------------------------------------------
+    # ======================================================
 
     selected_status = request.args.get(
         "status",
@@ -417,29 +509,17 @@ def admin_dashboard():
 
 
     return render_template(
-
         "admin_dashboard.html",
-
         issues=issues,
-
         selected_status=selected_status,
-
         total_issues=total_issues,
-
         pending_issues=pending_issues,
-
         in_progress_issues=in_progress_issues,
-
         resolved_issues=resolved_issues,
-
         high_priority=high_priority,
-
         medium_priority=medium_priority,
-
         low_priority=low_priority,
-
         category_counts=category_counts
-
     )
 
 
@@ -457,7 +537,8 @@ def update_issue_status(issue_id):
     if current_user.role != "admin":
 
         flash(
-            "Access denied."
+            "Access denied.",
+            "error"
         )
 
         return redirect(
@@ -469,14 +550,11 @@ def update_issue_status(issue_id):
         issue_id
     )
 
-
     new_status = request.form[
         "status"
     ]
 
-
     issue.status = new_status
-
 
     issue.updated_at = datetime.now(
         timezone.utc
@@ -484,28 +562,21 @@ def update_issue_status(issue_id):
         tzinfo=None
     )
 
-
     db.session.commit()
 
-
     flash(
-        "Issue status updated successfully."
+        "Issue status updated successfully.",
+        "success"
     )
 
-
     return redirect(
-
         url_for(
-
             "admin_dashboard",
-
             status=request.form.get(
                 "current_filter",
                 "All"
             )
-
         )
-
     )
 
 
@@ -523,7 +594,8 @@ def update_issue_priority(issue_id):
     if current_user.role != "admin":
 
         flash(
-            "Access denied."
+            "Access denied.",
+            "error"
         )
 
         return redirect(
@@ -534,7 +606,6 @@ def update_issue_priority(issue_id):
     issue = Issue.query.get_or_404(
         issue_id
     )
-
 
     new_priority = request.form[
         "priority"
@@ -548,7 +619,8 @@ def update_issue_priority(issue_id):
     ]:
 
         flash(
-            "Invalid priority selected."
+            "Invalid priority selected.",
+            "error"
         )
 
         return redirect(
@@ -560,35 +632,27 @@ def update_issue_priority(issue_id):
 
     issue.priority = new_priority
 
-
     issue.updated_at = datetime.now(
         timezone.utc
     ).replace(
         tzinfo=None
     )
 
-
     db.session.commit()
 
-
     flash(
-        "Issue priority updated successfully."
+        "Issue priority updated successfully.",
+        "success"
     )
 
-
     return redirect(
-
         url_for(
-
             "admin_dashboard",
-
             status=request.form.get(
                 "current_filter",
                 "All"
             )
-
         )
-
     )
 
 

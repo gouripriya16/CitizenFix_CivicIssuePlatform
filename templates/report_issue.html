@@ -2,13 +2,17 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Report Issue - CitizenFix</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
@@ -20,33 +24,59 @@
         </div>
 
         <div class="nav-links">
-            <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
+
+            <a href="{{ url_for('dashboard') }}">
+                Dashboard
+            </a>
+
+            <a href="{{ url_for('logout') }}">
+                Logout
+            </a>
+
         </div>
 
     </nav>
 
+
     <section class="dashboard-container">
 
-        <h1>Report a Civic Issue</h1>
+        <h1>
+            Report a Civic Issue
+        </h1>
 
         <p>
             Tell us about the problem you found in your community.
         </p>
 
+
+        <!-- Flash Messages -->
+
         {% with messages = get_flashed_messages(with_categories=true) %}
-           {% if messages %}
-              {% for category, message in messages %}
-                <div class="flash-message {{ category }}">
-                    {{ message }}
-                </div>
-              {% endfor %}
-           {% endif %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
         {% endwith %}
+
 
         <div class="dashboard-card">
 
-            <form method="POST">
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+
+                <!-- Issue Title -->
 
                 <label for="title">
                     Issue Title
@@ -61,6 +91,8 @@
                 >
 
 
+                <!-- Description -->
+
                 <label for="description">
                     Description
                 </label>
@@ -74,11 +106,17 @@
                 ></textarea>
 
 
+                <!-- Category -->
+
                 <label for="category">
                     Category
                 </label>
 
-                <select id="category" name="category" required>
+                <select
+                    id="category"
+                    name="category"
+                    required
+                >
 
                     <option value="">
                         Select a category
@@ -111,6 +149,8 @@
                 </select>
 
 
+                <!-- Location -->
+
                 <label for="location">
                     Location
                 </label>
@@ -124,7 +164,30 @@
                 >
 
 
-                <button type="submit" class="btn btn-primary">
+                <!-- Image Upload -->
+
+                <label for="image">
+                    Upload Photo
+                </label>
+
+                <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/png, image/jpeg, image/jpg"
+                >
+
+                <small>
+                    Upload a JPG or PNG image. Maximum size: 5 MB.
+                </small>
+
+
+                <!-- Submit -->
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
                     Submit Issue
                 </button>
 

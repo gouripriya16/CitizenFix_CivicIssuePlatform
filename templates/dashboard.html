@@ -2,13 +2,17 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Dashboard - CitizenFix</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
@@ -20,8 +24,15 @@
         </div>
 
         <div class="nav-links">
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
+
+            <a href="{{ url_for('home') }}">
+                Home
+            </a>
+
+            <a href="{{ url_for('logout') }}">
+                Logout
+            </a>
+
         </div>
 
     </nav>
@@ -29,33 +40,46 @@
 
     <section class="dashboard-container">
 
-        <h1>Welcome to CitizenFix!</h1>
+        <h1>
+            Welcome to CitizenFix!
+        </h1>
 
         <p>
             You are successfully logged in.
         </p>
 
 
+        <!-- Dashboard Card -->
+
         <div class="dashboard-card">
 
-            <h2>Your Dashboard</h2>
+            <h2>
+                Your Dashboard
+            </h2>
 
             <p>
                 Report civic issues in your area and help make
                 your community better.
             </p>
 
-            <a href="{{ url_for('report_issue') }}"
-               class="btn btn-primary">
+            <a
+                href="{{ url_for('report_issue') }}"
+                class="btn btn-primary"
+            >
                 📝 Report an Issue
             </a>
 
         </div>
 
 
+        <!-- My Reported Issues -->
+
         <div class="dashboard-card">
 
-            <h2>My Reported Issues</h2>
+            <h2>
+                My Reported Issues
+            </h2>
+
 
             {% if issues %}
 
@@ -63,48 +87,135 @@
 
                     <div class="issue-card">
 
+
+                        <!-- Issue Title -->
+
                         <h3>
                             🛠️ {{ issue.title }}
                         </h3>
 
+
+                        <!-- Description -->
+
                         <p>
-                            <strong>Description:</strong>
+
+                            <strong>
+                                Description:
+                            </strong>
+
                             {{ issue.description }}
+
                         </p>
 
+
+                        <!-- Category -->
+
                         <p>
-                            <strong>Category:</strong>
+
+                            <strong>
+                                Category:
+                            </strong>
+
                             {{ issue.category }}
+
                         </p>
 
+
+                        <!-- Location -->
+
                         <p>
-                            <strong>Location:</strong>
+
+                            <strong>
+                                Location:
+                            </strong>
+
                             {{ issue.location }}
+
                         </p>
 
+
+                        <!-- Uploaded Image -->
+
+                        {% if issue.image_filename %}
+
+                            <div class="issue-image">
+
+                                <p>
+                                    <strong>
+                                        📷 Uploaded Photo:
+                                    </strong>
+                                </p>
+
+                                <img
+                                    src="{{ url_for(
+                                        'static',
+                                        filename='uploads/' + issue.image_filename
+                                    ) }}"
+                                    alt="Civic issue photo"
+                                    class="issue-photo"
+                                >
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- Reported Date -->
+
                         <p>
-                            <strong>Reported On:</strong>
+
+                            <strong>
+                                Reported On:
+                            </strong>
+
                             {{ issue.created_at | india_time }}
+
                         </p>
 
+
+                        <!-- Status -->
+
                         <p>
-                            <strong>Status:</strong>
+
+                            <strong>
+                                Status:
+                            </strong>
+
                             {{ issue.status }}
-                        </p>
-                        
-                        <p>
-                            <strong>Priority:</strong>
-                            {{ issue.priority }}
+
                         </p>
 
+
+                        <!-- Priority -->
+
                         <p>
-                            <strong>Last Updated:</strong>
-                            {{ issue.updated_at | india_time }}
+
+                            <strong>
+                                Priority:
+                            </strong>
+
+                            {{ issue.priority }}
+
                         </p>
+
+
+                        <!-- Last Updated -->
+
+                        <p>
+
+                            <strong>
+                                Last Updated:
+                            </strong>
+
+                            {{ issue.updated_at | india_time }}
+
+                        </p>
+
 
                     </div>
 
                 {% endfor %}
+
 
             {% else %}
 

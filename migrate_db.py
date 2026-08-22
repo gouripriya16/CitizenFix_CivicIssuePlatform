@@ -2,24 +2,40 @@ import sqlite3
 import os
 
 
+
+# DATABASE PATH
+
 db_path = os.path.join(
     "instance",
     "citizenfix.db"
 )
 
 
-connection = sqlite3.connect(db_path)
+
+# CONNECT TO DATABASE
+
+
+connection = sqlite3.connect(
+    db_path
+)
 
 cursor = connection.cursor()
 
 
-cursor.execute("PRAGMA table_info(issues)")
+# GET EXISTING COLUMNS
+
+cursor.execute(
+    "PRAGMA table_info(issues)"
+)
 
 columns = [
     column[1]
     for column in cursor.fetchall()
 ]
 
+
+
+# ADD CREATED_AT COLUMN
 
 if "created_at" not in columns:
 
@@ -34,8 +50,12 @@ if "created_at" not in columns:
         WHERE created_at IS NULL
     """)
 
-    print("created_at column added.")
+    print(
+        "created_at column added."
+    )
 
+
+# ADD UPDATED_AT COLUMN
 
 if "updated_at" not in columns:
 
@@ -50,11 +70,36 @@ if "updated_at" not in columns:
         WHERE updated_at IS NULL
     """)
 
-    print("updated_at column added.")
+    print(
+        "updated_at column added."
+    )
 
+
+
+# ADD IMAGE_FILENAME COLUMN
+
+if "image_filename" not in columns:
+
+    cursor.execute("""
+        ALTER TABLE issues
+        ADD COLUMN image_filename VARCHAR(255)
+    """)
+
+    print(
+        "image_filename column added."
+    )
+
+
+
+# SAVE CHANGES
 
 connection.commit()
 
+# CLOSE DATABASE
+
 connection.close()
 
-print("Database migration completed successfully.")
+
+print(
+    "Database migration completed successfully."
+)
